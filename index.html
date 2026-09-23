@@ -21,8 +21,8 @@ body{margin:0;background:linear-gradient(145deg,var(--pink2),var(--blue2));color
 .glow{position:absolute;width:55vw;height:55vw;max-width:360px;max-height:360px;border-radius:50%;filter:blur(50px);opacity:.42;animation:drift 8s ease-in-out infinite alternate}
 .g1{background:#f1cbd8;top:-10%;left:-12%}.g2{background:#c5e0e7;bottom:-8%;right:-15%;animation-delay:-3s}
 .brush{position:absolute;opacity:.17;filter:drop-shadow(0 10px 12px #6b647022);animation:float 8s ease-in-out infinite}
-.b1{width:92px;right:3%;top:13%;transform:rotate(27deg)}.b2{width:80px;left:2%;top:34%;transform:rotate(-30deg);animation-delay:-2s}
-.b3{width:76px;right:8%;bottom:19%;transform:rotate(-15deg);animation-delay:-5s}.b4{width:66px;left:9%;bottom:11%;transform:rotate(38deg);animation-delay:-1s}
+.b1{width:140px;right:1%;top:10%;transform:rotate(27deg)}.b2{width:125px;left:-1%;top:31%;transform:rotate(-30deg);animation-delay:-2s}
+.b3{width:120px;right:4%;bottom:17%;transform:rotate(-15deg);animation-delay:-5s}.b4{width:105px;left:5%;bottom:9%;transform:rotate(38deg);animation-delay:-1s}
 .envelope-wrap{width:min(360px,92vw);position:relative;z-index:3;text-align:center}
 .hint{font-size:11px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px;opacity:.72}
 .envelope{height:245px;position:relative;cursor:pointer;filter:drop-shadow(0 25px 28px #5d4b5630);perspective:900px}
@@ -37,7 +37,7 @@ body{margin:0;background:linear-gradient(145deg,var(--pink2),var(--blue2));color
 .opening{position:fixed;inset:0;background:#fffaf7;z-index:20;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .7s}
 .opening.show{opacity:1;pointer-events:auto}
 .opening-card{width:min(340px,82vw);text-align:center}.opening-card h2{font:500 43px "Cormorant Garamond",serif;margin:0 0 8px}.opening-card p{font-size:12px;letter-spacing:.08em;opacity:.7}
-.content{position:relative;z-index:2;background:linear-gradient(180deg,#fffaf7 0%,#f9edf1 42%,#edf5f6 100%);min-height:150svh;padding:80px 20px 100px}
+.content{position:relative;z-index:2;background:linear-gradient(180deg,#fffaf7 0%,#f9edf1 42%,#edf5f6 100%);min-height:160svh;padding:80px 20px 100px}
 .content-inner{max-width:520px;margin:auto}
 .kicker{text-align:center;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#927b83}
 .title{font:500 clamp(50px,14vw,78px)/.88 "Cormorant Garamond",serif;text-align:center;margin:10px 0 12px}
@@ -55,9 +55,50 @@ body{margin:0;background:linear-gradient(145deg,var(--pink2),var(--blue2));color
 .fade{opacity:0;transform:translateY(28px);transition:opacity 1s ease,transform 1s ease}.fade.visible{opacity:1;transform:none}
 @keyframes float{50%{transform:translateY(-16px) rotate(34deg)}}@keyframes drift{to{transform:translate(25px,-20px) scale(1.08)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.music-btn{
+  position:fixed;right:16px;bottom:18px;z-index:50;
+  border:1px solid #ffffffaa;background:#fffaf7e8;color:#463c43;
+  border-radius:999px;padding:11px 15px;
+  font:500 11px Montserrat,system-ui,sans-serif;letter-spacing:.05em;
+  box-shadow:0 8px 24px #5c4b5522;backdrop-filter:blur(10px);
+  cursor:pointer;display:none;align-items:center;gap:7px;
+}
+.music-btn.show{display:flex}
+.music-btn.playing{background:#f5e2e8}
+.music-note{font-size:16px;line-height:1}
+
+
+.date-invite{
+  margin:55px auto 0;text-align:center;padding:26px 20px;
+  border-top:1px solid #b9915a55;border-bottom:1px solid #b9915a55;
+}
+.date-invite .date-label{
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:#927b83;margin-bottom:9px;
+}
+.date-invite .date{
+  font:500 30px "Cormorant Garamond",serif;
+}
+.closing{
+  margin-top:28px;text-align:center;
+}
+.closing .goodbye{
+  font:500 28px "Cormorant Garamond",serif;
+}
+.closing .signature{
+  margin-top:12px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+}
+
 </style>
 </head>
 <body>
+
+<audio id="backgroundMusic" src="./cancion.mp3" loop preload="auto" playsinline></audio>
+<button class="music-btn" id="musicBtn" type="button" aria-label="Reproducir música">
+  <span class="music-note">♫</span><span id="musicText">Música</span>
+</button>
+
 <div class="page" id="top">
   <div class="hero" id="hero">
     <div class="glow g1"></div><div class="glow g2"></div>
@@ -110,39 +151,63 @@ body{margin:0;background:linear-gradient(145deg,var(--pink2),var(--blue2));color
     <div class="sushi fade" data-fade>
       <img src="sushi.jpg" alt="Sushi">
     </div>
+
+    <div class="date-invite fade" data-fade>
+      <div class="date-label">Nuestra cita</div>
+      <div class="date">Jueves ✨</div>
+    </div>
+
+    <div class="closing fade" data-fade>
+      <div class="goodbye">Nos vemos jueves, linda 🩷</div>
+      <div class="signature">Con cariño, Andrés</div>
+    </div>
    </div>
  </main>
 
 <script>
 const envelope=document.getElementById('envelope');
 const opening=document.getElementById('opening');
+const music=document.getElementById('backgroundMusic');
+const musicBtn=document.getElementById('musicBtn');
+const musicText=document.getElementById('musicText');
 let opened=false;
 
-opening.addEventListener('click',()=>{
-  const music=document.getElementById('backgroundMusic');
-  if(music) music.play().catch(()=>{});
-});
+function updateMusicButton(){
+  const playing=!music.paused;
+  musicBtn.classList.toggle('playing',playing);
+  musicText.textContent=playing?'Pausar':'Música';
+  musicBtn.setAttribute('aria-label',playing?'Pausar música':'Reproducir música');
+}
+
+async function toggleMusic(){
+  try{
+    if(music.paused){
+      music.volume=0.28;
+      await music.play();
+    }else{
+      music.pause();
+    }
+  }catch(err){
+    musicText.textContent='Tocar música';
+  }
+  updateMusicButton();
+}
+
+musicBtn.addEventListener('click',toggleMusic);
+music.addEventListener('play',updateMusicButton);
+music.addEventListener('pause',updateMusicButton);
+music.addEventListener('ended',updateMusicButton);
 
 function openInvite(){
   if(opened)return;
   opened=true;
   envelope.classList.add('open');
-  const music=document.getElementById('backgroundMusic');
-  if(music){
-    music.volume=0.28;
-    music.currentTime=0;
-    const startMusic=()=>{
-      music.play().catch(()=>{
-        document.addEventListener('touchstart',()=>{
-          music.play().catch(()=>{});
-        },{once:true,passive:true});
-      });
-    };
-    startMusic();
-  }
+  musicBtn.classList.add('show');
+
   setTimeout(()=>{
     opening.classList.add('show');
   },650);
+
   setTimeout(()=>{
     opening.classList.remove('show');
     document.getElementById('invitation').scrollIntoView({behavior:'smooth'});
@@ -150,14 +215,25 @@ function openInvite(){
   },1650);
 }
 envelope.addEventListener('click',openInvite);
-envelope.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openInvite()}});
+envelope.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){
+    e.preventDefault();
+    openInvite();
+  }
+});
 
 const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+  entries.forEach(e=>{
+    if(e.isIntersecting)e.target.classList.add('visible')
+  });
 },{threshold:.14});
 document.querySelectorAll('[data-fade]').forEach(x=>obs.observe(x));
 
-function reveal(){document.querySelectorAll('[data-fade]').forEach((x,i)=>setTimeout(()=>x.classList.add('visible'),i*170))}
+function reveal(){
+  document.querySelectorAll('[data-fade]').forEach((x,i)=>
+    setTimeout(()=>x.classList.add('visible'),i*170)
+  )
+}
 </script>
 </body>
 </html>
